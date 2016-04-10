@@ -148,8 +148,6 @@ function copyToDirectory(filePath, folder) {
   console.log('file path: ' + filePath);
   console.log('folder: ' + folder);
 
-  //*************
-  //****FIX THIS - it's saving the new file to the folder where the scans are coming in and it's fucking everything up
   //first copy the file, take filePath (original name) and copy it, rename it newFileName
   var fileWithoutDirectory = filePath.split('/')[1];
   // console.log(fileWithoutDirectory);
