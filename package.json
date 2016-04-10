@@ -6,6 +6,7 @@
   "dependencies": {
     "chokidar": "^1.4.3",
     "fs.extra": "^1.3.2",
+    "gm": "^1.22.0",
     "hound": "^1.0.4",
     "junk": "^1.0.2",
     "node-tesseract": "^0.2.7",

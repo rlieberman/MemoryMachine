@@ -2,6 +2,9 @@ var fs = require('fs.extra'); //require the fs module + extra methods
 var chokidar = require('chokidar'); //for file watching - https://www.npmjs.com/package/chokidar
 var junk = require('junk'); //to filter out ds.store files 
 
+var fs = require('fs')  //require image magick https://www.npmjs.com/package/gm
+  , gm = require('gm');
+
 //require the node printer module
 var printer = require('printer'),
     util = require('util');
@@ -34,17 +37,29 @@ function processScan(path) {
   console.log('File', path, 'has been added'); 
 
   getOCRText(path); //pass the prompt to the function that does ocr + returns which prompt it is
-  //console.log('processScan, i am logging the prompt: ' + prompt); //this is returning undefined -- WHY???
+  
 }
 
 
+//rotate the image so it's upright
 //extract the prompt from the piece of paper using OCR -- https://www.npmjs.com/package/node-tesseract
 //----- NOTES FOR SCANNING -----
-//SCAN must be upright OR the ocr won't be able to recognize it so I need to figure out a way 
-//scanner is finnicky, also there is weird cropping
 function getOCRText(path) {
 
   var prompt;
+
+  // //flip the image 180 degrees - NOT WORKING
+  // gm('mirror.jpg')
+  // .flip()
+  // // .rotate('white', 180)
+  // .write('test_gm.jpg', function (err) { //rewrite the original path of the image to replace it
+  //   if (!err) {
+  //     console.log('image rotated 180 degrees');
+  //   }
+  //   else {
+  //     console.log(err);
+  //   }
+  // });
 
   tesseract.process(path,function(err, text) {
     if(err) {
@@ -64,20 +79,42 @@ function getPrompt(text) {
   var sentences = text.split("."); 
 
   prompt = sentences[0]; //prompt is the first sentence
-  console.log('getPrompt, i am logging the prompt i extracted: ' + prompt);
+  console.log('Prompt extracted from OCR: ' + prompt);
 
-  //if statement - eventually can use a switch statement -- NOT WORKING
-  if (prompt == 'Describe a memory of a mirror') {
-    prompt_choice = 'mirrors' ;
-  }
-  else if (prompt == 'Describe a memory about a lie you told') {
-    prompt_choice = 'lies';
-  }
-  else {
-    prompt_choice = 'climbing';
+  //use switch statement to evaluate prompt sentence and get short code
+  switch (prompt) {
+    case 'Describe a memory involving a mirror':
+      prompt_choice = 'mirrors';
+      break;
+    case 'Describe a memory about a lie you told':
+      prompt_choice = 'lies';
+      break;
+    case 'Describe a memory of a time you lost something':
+      prompt_choice = 'lost';
+      break;
+    case 'Describe a memory of climbing something':
+      prompt_choice = 'climbing';
+      break;
+    case 'Describe a memory of a depressing song':
+      prompt_choice = 'song';
+      break;
+    default:
+      prompt_choice = 'noprompt';
+
   }
 
-  console.log('getPrompt, i am logging the prompt choice from the if / else statement: ' + prompt_choice);
+  // //if statement - eventually can use a switch statement -- NOT WORKING
+  // if (prompt == 'Describe a memory involving a mirror') {
+  //   prompt_choice = 'mirrors';
+  // }
+  // else if (prompt == 'Describe a memory about a lie you told') {
+  //   prompt_choice = 'lies';
+  // }
+  // else {
+  //   prompt_choice = 'climbing';
+  // }
+
+  console.log('Short code for prompt choice from if / else statement: ' + prompt_choice);
 
   sendRandomFileToPrinter(processedDir + '/' + prompt_choice);
   // copyToDirectory(input_file, prompt_choice);
@@ -87,7 +124,7 @@ function getPrompt(text) {
 
 function sendRandomFileToPrinter(folder) {
 
-  console.log(folder);
+  // console.log('folder name: ' + folder);
 
   // //get list of everything in folder - use junk to filter out . files
   var filenames = fs.readdirSync(folder); 
@@ -96,13 +133,13 @@ function sendRandomFileToPrinter(folder) {
  //pick a random file
   var index = Math.floor(Math.random()*filenames.length);
   var file_choice = filenames[index];
-  console.log('file choice: ' + file_choice);
+  console.log('File choice of new memory: ' + file_choice);
 
 
   // send output file to the printer - from this example https://github.com/tojocky/node-printer/tree/master/examples
   if( process.platform != 'win32') {
-    console.log('file to print: ' + 'scans_processed/mirrors/' + file_choice);
-    printer.printFile({filename: 'scans_processed/mirrors/' + file_choice,
+    console.log('file to print: ' + folder + '/' + file_choice);
+    printer.printFile({filename: folder + '/' + file_choice,  // FIX THIS SO ITS DYNAMIC
       printer: my_printer, // printer name, if missing then will print to default printer
       success:function(jobID){
         console.log("sent to printer " + my_printer + " with ID: "+jobID);
