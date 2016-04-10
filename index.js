@@ -2,8 +2,7 @@ var fs = require('fs.extra'); //require the fs module + extra methods
 var chokidar = require('chokidar'); //for file watching - https://www.npmjs.com/package/chokidar
 var junk = require('junk'); //to filter out ds.store files 
 
-var fs = require('fs')  //require image magick https://www.npmjs.com/package/gm
-  , gm = require('gm');
+var gm = require('gm');  //require image magick https://www.npmjs.com/package/gm
 
 //require the node printer module
 var printer = require('printer'),
@@ -106,7 +105,9 @@ function getPrompt(text) {
   console.log('Short code for prompt choice from if / else statement: ' + prompt_choice);
 
   sendRandomFileToPrinter(processedDir + '/' + prompt_choice);
-  // copyToDirectory(input_file, prompt_choice);
+
+  //need a variable for the file that's coming in
+  copyToDirectory('scans_incoming/img20160401_18485819.jpg', 'scans_processed/' + prompt_choice);
 
 }
 
@@ -141,10 +142,32 @@ function sendRandomFileToPrinter(folder) {
   
 }
 
-//STILL TO DO THIS
-// function copyToDirectory(filePath, folder) {
-//   //move file here!
-// }
+//copy the file, move it to the right directory in scans_processed so it can become an output
+function copyToDirectory(filePath, folder) {
+
+  console.log('file path: ' + filePath);
+  console.log('folder: ' + folder);
+
+  //*************
+  //****FIX THIS - it's saving the new file to the folder where the scans are coming in and it's fucking everything up
+  //first copy the file, take filePath (original name) and copy it, rename it newFileName
+  var fileWithoutDirectory = filePath.split('/')[1];
+  // console.log(fileWithoutDirectory);
+  var newFileName = folder + '/' + fileWithoutDirectory.split('.')[0] + '_processed.jpg';
+  console.log('new file name: ' + newFileName);
+
+  //then copy and move the file to the appropriate folder 
+  fs.copy(filePath, newFileName, { replace: false }, function (err) {
+    if (err) {
+      // i.e. file already exists or can't write to directory 
+      throw err;
+    }
+    console.log('Copied ' + filePath + ' to ' + newFileName);
+  });
+
+  
+
+}
 
 
 
