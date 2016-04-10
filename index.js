@@ -103,17 +103,6 @@ function getPrompt(text) {
 
   }
 
-  // //if statement - eventually can use a switch statement -- NOT WORKING
-  // if (prompt == 'Describe a memory involving a mirror') {
-  //   prompt_choice = 'mirrors';
-  // }
-  // else if (prompt == 'Describe a memory about a lie you told') {
-  //   prompt_choice = 'lies';
-  // }
-  // else {
-  //   prompt_choice = 'climbing';
-  // }
-
   console.log('Short code for prompt choice from if / else statement: ' + prompt_choice);
 
   sendRandomFileToPrinter(processedDir + '/' + prompt_choice);
@@ -149,19 +138,7 @@ function sendRandomFileToPrinter(folder) {
       }
     });
   } 
-  // else {
-  //   // not yet implemented, use printDirect and text
-  //   var fs = require('fs');
-  //   printer.printDirect({data:fs.readFileSync(filename),
-  //     printer: my_printer, // printer name, if missing then will print to default printer
-  //     success:function(jobID){
-  //       console.log("sent to printer with ID: "+jobID);
-  //     },
-  //     error:function(err){
-  //       console.log(err);
-  //     }
-  //   });
-  // }
+  
 }
 
 //STILL TO DO THIS
