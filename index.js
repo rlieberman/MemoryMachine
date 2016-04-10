@@ -115,7 +115,7 @@ function sendRandomFileToPrinter(folder) {
 
   // console.log('folder name: ' + folder);
 
-  // //get list of everything in folder - use junk to filter out . files
+  //get list of everything in folder within scans_processed - use junk module to filter out . files
   var filenames = fs.readdirSync(folder); 
   filenames = filenames.filter(junk.not);
 
