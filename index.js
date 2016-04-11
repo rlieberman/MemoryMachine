@@ -65,12 +65,12 @@ function getOCRText(path) {
       console.error(err);
     } else {
       // console.log(text);
-      getPrompt(text); //callback so we have access to the text contents
+      getPrompt(text, path); //callback so we have access to the text contents
     }
   });
 }
-
-function getPrompt(text) {
+ 
+function getPrompt(text, path) { //gets OCR text and original file path
 
   var prompt_choice; //the prompt we end up returning to choose the directory
 
@@ -78,14 +78,16 @@ function getPrompt(text) {
   var sentences = text.split("."); 
 
   prompt = sentences[0]; //prompt is the first sentence
+  prompt = prompt.replace(/\r?\n|\r/g, ' ');
   console.log('Prompt extracted from OCR: ' + prompt);
 
   //use switch statement to evaluate prompt sentence and get short code
+  //MAKE SURE language on cards is consistent with what's below
   switch (prompt) {
-    case 'Describe a memory involving a mirror':
+    case 'Describe a memory of a mirror':
       prompt_choice = 'mirrors';
       break;
-    case 'Describe a memory about a lie you told':
+    case 'Describe a memory of a lie you told':
       prompt_choice = 'lies';
       break;
     case 'Describe a memory of a time you lost something':
@@ -106,8 +108,9 @@ function getPrompt(text) {
 
   sendRandomFileToPrinter(processedDir + '/' + prompt_choice);
 
-  //need a variable for the file that's coming in
-  copyToDirectory('scans_incoming/img20160401_18485819.jpg', 'scans_processed/' + prompt_choice);
+  // console.log('path coming into getPrompt function: ' + path);
+  //path is file that's coming in
+  copyToDirectory(path, 'scans_processed/' + prompt_choice);
 
 }
 
@@ -155,16 +158,14 @@ function copyToDirectory(filePath, folder) {
   console.log('new file name: ' + newFileName);
 
   //then copy and move the file to the appropriate folder 
-  fs.copy(filePath, newFileName, { replace: false }, function (err) {
+  fs.copy(filePath, newFileName, { replace: true }, function (err) {
     if (err) {
       // i.e. file already exists or can't write to directory 
       throw err;
     }
     console.log('Copied ' + filePath + ' to ' + newFileName);
   });
-
   
-
 }
 
 
