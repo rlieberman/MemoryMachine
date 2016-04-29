@@ -31,7 +31,6 @@ var watcher = chokidar.watch(incomingDir, {
 //when a scan is added, call the function processScan
 watcher.on('add', processScan);
 
-
 function processScan(path) { 
   console.log('File', path, 'has been added'); 
 
@@ -40,20 +39,20 @@ function processScan(path) {
 }
 
 
-//rotate the image so it's upright
 //extract the prompt from the piece of paper using OCR -- https://www.npmjs.com/package/node-tesseract
+//also convert the image to grayscale and do some image processing on it
 //----- NOTES FOR SCANNING -----
 function getOCRText(path) {
 
   var prompt;
 
-  // //flip the image 180 degrees - NOT WORKING
-  // gm('mirror.jpg')
-  // .flip()
+  // // NOT WORKING -- convert image to grayscale
+  // gm('img20160418113520.jpg').colorspace('GRAY')
+  // // .flip()
   // // .rotate('white', 180)
-  // .write('test_gm.jpg', function (err) { //rewrite the original path of the image to replace it
+  // .write('img20160418113520_gray.jpg', function (err) { //rewrite the original path of the image to replace it
   //   if (!err) {
-  //     console.log('image rotated 180 degrees');
+  //     console.log('image converted to grayscale');
   //   }
   //   else {
   //     console.log(err);
@@ -75,29 +74,32 @@ function getPrompt(text, path) { //gets OCR text and original file path
   var prompt_choice; //the prompt we end up returning to choose the directory
 
   //grab only the text in the first sentence - has to have a period at the end
-  var sentences = text.split("."); 
+  var sentences = text.split(":"); 
 
   prompt = sentences[0]; //prompt is the first sentence
-  prompt = prompt.replace(/\r?\n|\r/g, ' ');
+  prompt = prompt.replace(/\r?\n|\r/g, ' ').toLowerCase(); //remove line breaks and convert to lowercase
   console.log('Prompt extracted from OCR: ' + prompt);
 
   //use switch statement to evaluate prompt sentence and get short code
   //MAKE SURE language on cards is consistent with what's below
   switch (prompt) {
-    case 'Describe a memory of a mirror':
-      prompt_choice = 'mirrors';
+    case 'describe a memory about hands':
+      prompt_choice = 'hands';
       break;
-    case 'Describe a memory of a lie you told':
-      prompt_choice = 'lies';
+    case 'describe a memory involving a mirror':
+      prompt_choice = 'mirror';
       break;
-    case 'Describe a memory of a time you lost something':
+    case 'describe a memory about a lie you told':
+      prompt_choice = 'lie';
+      break;
+    case 'describe a memory of a time you lost something':
       prompt_choice = 'lost';
       break;
-    case 'Describe a memory of climbing something':
-      prompt_choice = 'climbing';
+    case 'describe a memory about a stranger':
+      prompt_choice = 'stranger';
       break;
-    case 'Describe a memory of a depressing song':
-      prompt_choice = 'song';
+    case 'describe a memory of waiting for something':
+      prompt_choice = 'wait';
       break;
     default:
       prompt_choice = 'noprompt';
@@ -108,8 +110,9 @@ function getPrompt(text, path) { //gets OCR text and original file path
 
   sendRandomFileToPrinter(processedDir + '/' + prompt_choice);
 
-  // console.log('path coming into getPrompt function: ' + path);
-  //path is file that's coming in
+  console.log('path coming into getPrompt function: ' + path);
+
+  // path is file that's coming in
   copyToDirectory(path, 'scans_processed/' + prompt_choice);
 
 }
