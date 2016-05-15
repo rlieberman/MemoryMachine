@@ -2,7 +2,8 @@ var fs = require('fs.extra'); //require the fs module + extra methods
 var chokidar = require('chokidar'); //for file watching - https://www.npmjs.com/package/chokidar
 var junk = require('junk'); //to filter out ds.store files 
 
-var gm = require('gm');  //require image magick https://www.npmjs.com/package/gm
+var Jimp = require("jimp"); //https://github.com/oliver-moran/jimp
+// var gm = require('gm');  //NOT WORKING -- require image magick https://www.npmjs.com/package/gm
 
 //require the node printer module
 var printer = require('printer'),
@@ -15,6 +16,9 @@ var processedDir = 'scans_processed';
 //select default printer -- double check which one i'm printing to
 var my_printer = printer.getDefaultPrinterName(); 
 console.log(my_printer);
+// var options = printer.getPrinterDriverOptions(my_printer);
+// console.log(options);
+
 // //list all printers on my computer
 // console.log("installed printers:\n"+util.inspect(printer.getPrinters(), {colors:true, depth:10}));
 
@@ -46,18 +50,25 @@ function getOCRText(path) {
 
   var prompt;
 
-  // // NOT WORKING -- convert image to grayscale
-  // gm('img20160418113520.jpg').colorspace('GRAY')
-  // // .flip()
-  // // .rotate('white', 180)
-  // .write('img20160418113520_gray.jpg', function (err) { //rewrite the original path of the image to replace it
-  //   if (!err) {
-  //     console.log('image converted to grayscale');
-  //   }
-  //   else {
-  //     console.log(err);
-  //   }
-  // });
+  // console.log(typeof(path));
+  // console.log(path);
+
+
+  //image processing with jimp, pass it the incoming scan 
+  //puts a white image over the bottom part
+  Jimp.read(path, function (err, memoryScan) {
+    console.log("path inside of jimp is: " + path);
+    if (err) throw err;
+    memoryScan.greyscale()  // set greyscale 
+    memoryScan.contrast(.5); //up contrast
+
+    Jimp.read("white.jpg", function (err, whiteImage) {
+      memoryScan.composite(whiteImage,0,1660);
+      memoryScan.write("test-jimp4.jpg");
+    });
+  });
+
+
 
   tesseract.process(path,function(err, text) {
     if(err) {
@@ -77,7 +88,14 @@ function getPrompt(text, path) { //gets OCR text and original file path
   var sentences = text.split(":"); 
 
   prompt = sentences[0]; //prompt is the first sentence
+
   prompt = prompt.replace(/\r?\n|\r/g, ' ').toLowerCase(); //remove line breaks and convert to lowercase
+  prompt = prompt.replace(/\s\s+/g, ' '); //get rid of spare spaces
+
+  //make sure there's no junk before the beginning of hte sentence
+  var sentence_start = prompt.indexOf('describe');
+  prompt = prompt.substring(sentence_start);
+
   console.log('Prompt extracted from OCR: ' + prompt);
 
   //use switch statement to evaluate prompt sentence and get short code
@@ -170,7 +188,5 @@ function copyToDirectory(filePath, folder) {
   });
   
 }
-
-
 
 
