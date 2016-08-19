@@ -60,11 +60,12 @@ function getOCRText(path) {
     console.log("path inside of jimp is: " + path);
     if (err) throw err;
     memoryScan.greyscale()  // set greyscale 
-    memoryScan.contrast(.5); //up contrast
+    memoryScan.contrast(.6); //up contrast
 
     Jimp.read("white.jpg", function (err, whiteImage) {
-      memoryScan.composite(whiteImage,0,1660);
-      memoryScan.write("test-jimp4.jpg");
+      //2160 is the pixel height of the scan MINUS height of the white image
+      memoryScan.composite(whiteImage,0,2160);
+      memoryScan.write(path);
     });
   });
 
@@ -169,8 +170,6 @@ function sendRandomFileToPrinter(folder) {
 //copy the file, move it to the right directory in scans_processed so it can become an output
 function copyToDirectory(filePath, folder) {
 
-  console.log('file path: ' + filePath);
-  console.log('folder: ' + folder);
 
   //first copy the file, take filePath (original name) and copy it, rename it newFileName
   var fileWithoutDirectory = filePath.split('/')[1];
@@ -187,6 +186,25 @@ function copyToDirectory(filePath, folder) {
     console.log('Copied ' + filePath + ' to ' + newFileName);
   });
   
+  // console.log('file path: ' + filePath);
+  // console.log('folder: ' + folder);
+  // processImage(newFileName); //not working
+
 }
 
+// function processImage (imagePath) {
 
+//   //image processing with jimp once it's been copied over, pass it the incoming scan 
+//   //puts a white image over the bottom part
+//   Jimp.read(imagePath, function (err, memoryScan) {
+//     console.log("path inside of jimp is: " + imagePath);
+//     if (err) throw err;
+//     memoryScan.greyscale()  // set greyscale 
+//     memoryScan.contrast(.6); //up contrast
+
+//     Jimp.read("white.jpg", function (err, whiteImage) {
+//       memoryScan.composite(whiteImage,0,1660);
+//       memoryScan.write(imagePath);
+//     });
+//   });
+// }
